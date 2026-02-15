@@ -14,19 +14,24 @@ import os
 // Prism bundle is missing, or when tokenization fails. In all cases, it returns
 // a single plain token containing the entire code string.
 
-struct CodeToken: Hashable, Sendable {
-  let content: String
-  let type: StructuredText.HighlighterTheme.TokenType
+public struct CodeToken: Hashable, Sendable {
+  public let content: String
+  public let type: StructuredText.HighlighterTheme.TokenType
+
+  public init(content: String, type: StructuredText.HighlighterTheme.TokenType) {
+    self.content = content
+    self.type = type
+  }
 }
 
 #if canImport(JavaScriptCore)
-  actor CodeTokenizer {
+  public actor CodeTokenizer {
     private let context: JSContext
     private let logger = Logger(category: .codeTokenizer)
 
-    static let shared = CodeTokenizer()
+    public static let shared = CodeTokenizer()
 
-    init?() {
+    public init?() {
       guard let context = JSContext() else {
         logger.error("JavascriptCore is not available.")
         return nil
@@ -47,7 +52,7 @@ struct CodeToken: Hashable, Sendable {
       self.context = context
     }
 
-    func tokenize(code: String, language: String) -> [CodeToken] {
+    public func tokenize(code: String, language: String) -> [CodeToken] {
       guard
         let tokenizeCode = context.objectForKeyedSubscript("tokenizeCode"),
         let result = tokenizeCode.call(withArguments: [code, language]),
@@ -69,17 +74,17 @@ struct CodeToken: Hashable, Sendable {
     }
   }
 #else
-  actor CodeTokenizer {
+  public actor CodeTokenizer {
     private let logger = Logger(category: .codeTokenizer)
 
-    static let shared = CodeTokenizer()
+    public static let shared = CodeTokenizer()
 
-    init?() {
+    public init?() {
       logger.error("JavascriptCore is not available in this platform.")
       return nil
     }
 
-    func tokenize(code: String, language: String) -> [CodeToken] {
+    public func tokenize(code: String, language: String) -> [CodeToken] {
       [CodeToken(content: code, type: .plain)]
     }
   }
